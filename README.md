@@ -1,61 +1,66 @@
-# crypto-tax
-The crypto-tax package processes transactions using various tax accounting methods
+# Purpose
+Processes financial transactions for use in annual Capital Gains tax reporting
+
+# Purpose & Usage
+Current tax portfolio tools do not accurately render many transaction types. Therefore, many have resorted to populating important transactionsinto a spreadsheet.
+
+The crypto-tax package uses the 'Base Asset' and 'Quote Asset' model which is common in trading platforms.
+- Base Asset: Asset being traded
+- Quote Asset: Asset that Base Asset is being quoted in. Typically USD or other fiat
+
+For trades that do not use Quote Asset as taxable Fiat asset, for example crypto<>crypto or crypto<>NFT, users should use a double entry system where trade rounds through tax-demoninated Asset. 
+
+For example, purchasing a NFT for 2 ETH, when ETH trading at $2k USD:
+|DateTime|Txn Type|Base Asset|Base Asset Amount|Quote Asset|Quote Asset Amount| Price|
+|--------|---------|------|-----------------|-----------|------------------|------|
+|2021-09-27T01:46:03.000Z|SELL|ETH|2|USD|4000|2000|
+|2021-09-27T01:46:03.000Z|BUY|NFT_NAME|1|USD|4000|4000|
+
+Minimum Required Columns:
+- DateTime: Format 2021-09-27T01:46:03.000Z
+- Txn Type: eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
+- Base Asset: Asset being traded
+- Base Asset Amount: How much of asset is traded
+- Quote Asset: Asset the traded asset is being quoted in
+- Quote Asset Amount: Amount of Quote Asset
+- Price: # FIGURE OUT IF ACTUALLY NEEDED
+
+Users should create a config.ini file and populate with below information.
 
 # Configuration
-Must use a 'config.ini' file
+Must use a 'config.ini' file. An exmaple is in the repo.
 
-Config file has three Sections. 
+Config file has five Sections:
 
-[accounting_type]\
-accounting_type: # Must be FIFO, HIFO, LIFO\
+### [accounting_type]\
+#Must be FIFO, HIFO, LIFO\
+**accounting_type:**
 
-[csv_info]\
+### [csv_info]
 #Information about where the csv of transactions is stored\
-filename: required. Should end in .csv\
-dir: optional. Leave value equal to empty if file is in current directory\
+**filename:** required. Should end in .csv\
+**dir:** optional. Leave value equal to empty if file is in current directory\
 
-[csv_columns]\
+### [csv_columns]
 #Identifies which column names contain which values
-timestamp: required. When trade occured. Value should be in format YYYY-MM-DDTHH:MM:SS.000Z\
-txn_id: optional. Unique user providedid for transaction\
-txn_type: required.\
-base_asset: required. Asset being traded / sold\
-base_asset_amount: required\
-quote_asset: optional. Quote asset, typically USD\
-quote_asset_amount: required. Amount asset sold for\
-price_paid: optional. Price paid for asset, in terms of quote_asset_amount / base_asset_amount\ 
+**DateTime:** required. When trade occured. Value should be in format YYYY-MM-DDTHH:MM:SS.000Z\
+**txn_id:** optional. Unique user providedid for transaction\
+**txn_type:** required.\
+**base_asset:** required. Asset being traded / sold\
+**base_asset_amount:** required\
+**quote_asset:** optional. Quote asset, typically USD\
+**quote_asset_amount:** required. Amount asset sold for\
+**price_paid:** optional. Price paid for asset, in terms of quote_asset_amount / base_asset_amount\ 
 
-[txn_types]
-Opportunity to enter which values correspond to buy and sell transactions. Specifically, based on string search of column txn_type. For example, Airdrop can be added to be a buy transaction. 
+### [buy_txn_types]
+Enter which values correspond to buy transactions. Specifically, based on string search of column txn_type. For example, Airdrop can be added to be a buy transaction. 
+
+### [sell_txn_types]
+Enter which values correspond to buy transactions
 
 ## Example File
-config.ini
-_______________
-[accounting_type]
-accounting_type = HIFO
+[config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini)
 
-[csv_info]
-filename = crypto_tax_txns.csv
-dir = 
-
-[csv_columns]
-timestamp = DateTime
-txn_id = internal_txn_id
-txn_type = Transaction Type
-base_asset = Base Asset
-base_asset_amount = Base Asset Amount
-quote_asset = Quote Asset
-quote_asset_amount = Quote Asset Amount
-price_paid = Price Paid
-
-[txn_types]
-buy = BUY, AIRDROP, REDEEM
-sell = SELL
-
-# Usage
-
-
-### Helpful Hints:
-- In the config.ini file, DO NOT use '' or "" around entries. Every value is already ingested as a string already, 
-- Supported accounting methods are FIFO, LIFO, HIFO
-- Columns txn_type should NOT contain words in the txn_types | buy and txn_types | sell, otherwise it will be double counted
+# Helpful Hints:
+- In the config.ini file, DO NOT use '' or "" around entries. Values are ingested as strings and converted when needed.
+- Columns txn_type entries should contain words that are in both [buy_txn_types] and [sell_txn_types], otherwise they will be double counted
