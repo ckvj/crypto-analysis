@@ -127,10 +127,8 @@ def build_buy_list(trades, analysis_type: str, buy_types: List[str]):
     buy_txn_list = []
 
     for trade in trades:
-        for buy_type in buy_types:
-            if buy_type in trade.txn_type:
-                buy_txn_list.append(trade)
-                break
+        if any(buy_type in trade.txn_type for buy_type in buy_types):
+            buy_txn_list.append(trade)
         
     if buy_txn_list == []:
         print('Error: No Buy events for ', trades[0].base_asset)
@@ -149,10 +147,8 @@ def build_sell_list(trades, sell_types: List[str]):
     sell_txn_list = []
 
     for trade in trades:
-        for sell_type in sell_types:
-            if sell_type in trade.txn_type:
-                sell_txn_list.append(trade)
-                break
+        if any(sell_type in trade.txn_type for sell_type in sell_types):
+            sell_txn_list.append(trade)
 
     sell_txn_list = sorted(sell_txn_list, key = lambda x : x.epoch_time)
 
