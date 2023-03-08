@@ -23,7 +23,6 @@ Minimum Required Columns:
 - **Base Asset Amount:** How much of asset is traded
 - **Quote Asset:** Asset the traded asset is being quoted in
 - **Quote Asset Amount:** Amount of Quote Asset
-- **Price:** # FIGURE OUT IF ACTUALLY NEEDED
 
 Users should create a config.ini file and populate with below information.
 
@@ -44,13 +43,13 @@ Config file has five Sections:
 ### [csv_columns]
 #Identifies which column names contain which values\
 **DateTime:** required. When trade occured. Value should be in format YYYY-MM-DDTHH:MM:SS.000Z\
-**txn_id:** optional. Unique user providedid for transaction\
+**txn_id:** ***NOT USED YET*** optional. Unique user provided transaction id\
 **txn_type:** required.\
 **base_asset:** required. Asset being traded / sold\
 **base_asset_amount:** required\
-**quote_asset:** optional. Quote asset, typically USD\
+**quote_asset:** ***NOT USED YET.*** optional. Quote asset, typically USD\
 **quote_asset_amount:** required. Amount asset sold for\
-**price_paid:** optional. Price paid for asset, in terms of quote_asset_amount / base_asset_amount\ 
+ 
 
 ### [buy_txn_types]
 #Enter which values correspond to buy transactions. Specifically, based on string search of column txn_type. For example, Airdrop can be added to be a buy transaction.\
