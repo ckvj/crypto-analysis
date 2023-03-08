@@ -1,4 +1,4 @@
-from trade_sales import Sales
+from sales import Sales
 
 def main():
     
