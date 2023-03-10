@@ -2,29 +2,34 @@
 Processes financial transactions for use in annual capital gains tax reporting
 
 # Usage
-Current tax portfolio tools do not accurately render many transaction types. Therefore, many have resorted to populating important transactionsinto a spreadsheet.
+Current tax portfolio tools do not accurately render many transaction types. Therefore, many crypto users have resorted to populating important transactions into a spreadsheet.
 
-The crypto-tax package uses the 'Base Asset' and 'Quote Asset' model which is common in trading platforms.
+The crypto-tax package is a tool that enables individuals to easily calculate their tax basis across assets and calendar year.
+
+The package uses the 'Base Asset' and 'Quote Asset' model which is common in trading platforms.
 - Base Asset: Asset being traded
-- Quote Asset: Asset that Base Asset is being quoted in. Typically USD or other fiat
+- Quote Asset: Asset that Base Asset is being quoted in. Typically USD or other fiat.
 
-For trades that do not use Quote Asset as taxable Fiat asset, for example crypto<>crypto or crypto<>NFT, users should use a double entry system where trade rounds through tax-demoninated Asset. 
+For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>crypto trades or crypto<>NFT), users should use a double entry system where trade routes through tax-demoninated Asset. 
 
-For example, purchasing a NFT for 2 ETH, when ETH trading at $2k USD:
+For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $2k USD:
 |DateTime|Txn Type|Base Asset|Base Asset Amount|Quote Asset|Quote Asset Amount| Price|
 |--------|---------|------|-----------------|-----------|------------------|------|
 |2021-09-27T01:46:03.000Z|SELL|ETH|2|USD|4000|2000|
 |2021-09-27T01:46:03.000Z|BUY|NFT_NAME|1|USD|4000|4000|
 
-Minimum Required Columns:
-- **DateTime:** Format 2021-09-27T01:46:03.000Z
-- **Txn Type:** eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
-- **Base Asset:** Asset being traded
-- **Base Asset Amount:** How much of asset is traded
-- **Quote Asset:** Asset the traded asset is being quoted in
-- **Quote Asset Amount:** Amount of Quote Asset
+### Minimum Required Columns:
+- **timestamp:** Format 2021-09-27T01:46:03.000Z
+- **txn_type:** eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
+- **base_asset:** Asset being traded
+- **base_asset_amount:** How much of asset is traded
+- **quote_asset:** Asset the traded asset is being quoted in
+- **quote_asset_amount:** Amount of Quote Asset
 
-Users should create a config.ini file and populate with below information.
+### Optional Columns:
+- **user_txn_id:** Optional user-provided identifier that is populated into resulting sale log 
+
+Users should create a config.ini file and populate with below information. An example is in the repo at [config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini)
 
 # Configuration
 Must use a 'config.ini' file. An exmaple is in the repo.
@@ -42,14 +47,15 @@ Config file has five Sections:
 
 ### [csv_columns]
 #Identifies which column names contain which values\
-**DateTime:** required. When trade occured. Value should be in format YYYY-MM-DDTHH:MM:SS.000Z\
-**txn_id:** ***NOT USED YET*** optional. Unique user provided transaction id\
-**txn_type:** required.\
-**base_asset:** required. Asset being traded / sold\
-**base_asset_amount:** required\
-**quote_asset:** ***NOT USED YET.*** optional. Quote asset, typically USD\
-**quote_asset_amount:** required. Amount asset sold for\
+**timestamp:** When trade occured. Value should be in format YYYY-MM-DDTHH:MM:SS.000Z\
+**txn_type:** 
+**base_asset:** Name of asset name being traded / sold\
+**base_asset_amount:** \
+**quote_asset:** Quote asset name, typically USD or Fiat\
+**quote_asset_amount:** Amount asset is sold for\
  
+ ## [opt_csv_columns]
+ - **user_txn_id:** optional user provided id that can be populated into the Sale Log
 
 ### [buy_txn_types]
 #Enter which values correspond to buy transactions. Specifically, based on string search of column txn_type. For example, Airdrop can be added to be a buy transaction.\
@@ -61,8 +67,6 @@ Config file has five Sections:
 #Enter which values correspond to buy transactions
 **sell:** SELL
 
-## Example File
-[config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini)
 
 # Helpful Hints:
 - In the config.ini file, DO NOT use '' or "" around entries. Values are ingested as strings and converted when needed.

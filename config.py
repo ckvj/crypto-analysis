@@ -26,11 +26,20 @@ def process_config():
 
     # Create List of sell types
     config_dict['sell_types_list'] = [x for x in list(config_dict['sell_txn_types'].values())]
+    
+    # Create dictionary to rename required & optional columns
+    config_dict['col_rename'] = {y: x for x, y in config_dict['csv_columns'].items()}
+    opt_cols = {y: x for x, y in config_dict['opt_csv_columns'].items() if y != ''}
+    config_dict['col_rename'].update(opt_cols)
 
     # Identify Columns to convert from string to other dtype
     _column_dtypes = {config_dict['csv_columns']['quote_asset_amount'] : float}
+
+    if config_dict['opt_csv_columns']['user_txn_id'] != '':
+        _column_dtypes.update({config_dict['opt_csv_columns']['user_txn_id'] : str})
+
     _converter = {config_dict['csv_columns']['base_asset_amount'] : Decimal}
-    
+
     # Accounting Type Validations
     _supported_accounting_types = ['FIFO', 'LIFO', 'HIFO']
     if config_dict['accounting_type']['accounting_type'] not in _supported_accounting_types:
