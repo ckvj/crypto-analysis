@@ -41,8 +41,7 @@ def import_csv_as_df(
         
     # Rename Columns & index
     if column_rename:
-        column_names = {y: x for x, y in column_rename.items()}
-        df = df.rename(columns = column_names)
+        df = df.rename(columns = column_rename)
 
     if index_rename:
         df.index.name = index_rename

@@ -1,7 +1,7 @@
 import datetime
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import timezone
 
 import pandas as pd
@@ -20,19 +20,17 @@ class Sales():
         
     
     def create_trades_csv(self):
-        _config_dict, _col_dtypes, _converter = process_config()
-
-        self._config_dict = _config_dict # Store for later use
+        self._config_dict, _col_dtypes, _converter = process_config()
 
         raw_csv = import_csv_as_df(
-            filename = _config_dict['file_info']['filename'],
-            dir = _config_dict['file_info']['dir'],
-            index_col_name = _config_dict['csv_columns']['timestamp'],
+            filename = self._config_dict['file_info']['filename'],
+            dir = self._config_dict['file_info']['dir'],
+            index_col_name = self._config_dict['csv_columns']['timestamp'],
             index_rename = 'timestamp',
             index_is_datetime = True,
             converter = _converter,
             column_types = _col_dtypes,
-            column_rename = _config_dict['csv_columns'])
+            column_rename = self._config_dict['col_rename'])
         
         return raw_csv
     
@@ -56,24 +54,48 @@ class Sales():
             base_asset_amount: Decimal
             quote_asset: str
             quote_asset_amount: float
+            user_txn_id: Optional[str]
 
             def __post_init__(self):
                 self.epoch_time = self.trade_time.replace(tzinfo=timezone.utc).timestamp()
                 self.remaining = self.base_asset_amount
                 self.price = self.quote_asset_amount / float(self.base_asset_amount)
-        
+            
+        def build_trade(row):
+                
+            try:
+                if row['user_txn_id'] == '':
+                    row['user_txn_id'] = None
+                else:
+                    pass
+            except KeyError:
+                row['user_txn_id'] = None
+
+
+            trade =  Trade(
+                index.to_pydatetime(),
+                row['txn_type'],
+                row['base_asset'],
+                row['base_asset_amount'],
+                row['quote_asset'],
+                row['quote_asset_amount'],
+                row['user_txn_id'])
+
+            return trade    
+            
         
         unprocessed_trades: Dict[str, List[Trade]] = {}
 
         for index, row in self.trades.iterrows():
 
-            trade = Trade(index.to_pydatetime(), row['txn_type'], row['base_asset'], row['base_asset_amount'], row['quote_asset'],row['quote_asset_amount'])
-
+            trade = build_trade(row)
+            
             if unprocessed_trades.get(trade.base_asset) == None:
                 unprocessed_trades[trade.base_asset] = [trade]
                 continue
             
             unprocessed_trades[trade.base_asset].append(trade)
+        
         return unprocessed_trades
     
     @staticmethod
@@ -89,10 +111,10 @@ class Sales():
         
         
     @staticmethod
-    def build_row(buy, sale, size: float, gain_loss: float, long_term: bool) -> pd.DataFrame:
+    def build_sale_row(buy, sale, size: float, gain_loss: float, long_term: bool) -> pd.DataFrame:
 
 
-        row = pd.DataFrame([{'BaseAsset' : sale.base_asset, 'QuoteAsset' : sale.quote_asset, 'BuyDate' : buy.trade_time, 'SellDate' : sale.trade_time, 'Amount' : size, 'BuyPrice' : buy.price, 'SellPrice' : sale.price, 'Gain/Loss' : gain_loss, 'Long-Term' : long_term, 'SellYear' : sale.trade_time.year}])
+        row = pd.DataFrame([{'BaseAsset' : sale.base_asset, 'QuoteAsset' : sale.quote_asset, 'BuyID' : buy.user_txn_id,'BuyDate' : buy.trade_time, 'BuyPrice' : buy.price, 'SellID' : sale.user_txn_id, 'SellDate' : sale.trade_time,  'SellPrice' : sale.price, 'Amount' : size, 'Gain/Loss' : gain_loss, 'Long-Term' : long_term, 'SellYear' : sale.trade_time.year}])
         
         return row
 
@@ -183,7 +205,7 @@ class Sales():
 
                             
                             # Log Sale
-                            row = Sales.build_row(buy, sale, clip_size, cap_gain_loss, is_long_term)
+                            row = Sales.build_sale_row(buy, sale, clip_size, cap_gain_loss, is_long_term)
                             sale_log = pd.concat([sale_log, row])
 
                             # Cleanup & Increment
@@ -223,4 +245,12 @@ class Sales():
         annual_summary.loc['Total'] = annual_summary.sum()    
             
         return annual_summary
+
+
+    def download_sale_list(self):
+        self.sale_list.to_csv('sale_log.csv')
+        return
     
+    def download_annual_summary(self):
+        self.annual_summary.to_csv('annual_summary.csv')
+        return
