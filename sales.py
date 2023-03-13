@@ -14,12 +14,12 @@ from import_csv import import_csv_as_df
 class Sales():
 
     def __init__(self) -> None:
-        self.trades = self.create_trades_csv()
-        self.sale_list = self.create_sale_list()
-        self.annual_summary = self.create_sale_summary()
+        self.trades = self.create_trades()
+        self.sale_list = self.create_sale_list(self.trades)
+        self.annual_summary = self.create_annual_summary(self.sale_list)
         
     
-    def create_trades_csv(self):
+    def create_trades(self) -> pd.DataFrame:
         self._config_dict, _col_dtypes, _converter = process_config()
 
         raw_csv = import_csv_as_df(
@@ -35,16 +35,16 @@ class Sales():
         return raw_csv
     
 
-    def create_sale_list(self):
+    def create_sale_list(self, trades):
             
-            unprocessed_trades = self.populate_trades(self.trades)
+            unprocessed_trades = Sales.package_trades(trades)
             
-            sale_list = self.process_trades(unprocessed_trades, self._config_dict['accounting_type']['accounting_type'], self._config_dict['buy_types_list'], self._config_dict['sell_types_list'])
+            sale_list = Sales.process_trades(unprocessed_trades, self._config_dict['accounting_type']['accounting_type'], self._config_dict['buy_types_list'], self._config_dict['sell_types_list'])
 
             return sale_list
     
-    
-    def populate_trades(self, raw_csv: pd.DataFrame) -> dict:
+    @staticmethod
+    def package_trades(trades: pd.DataFrame) -> dict: #Question: How to annote List[Trade]? Trade not recognized.
         
         @dataclass
         class Trade:
@@ -61,7 +61,7 @@ class Sales():
                 self.remaining = self.base_asset_amount
                 self.price = self.quote_asset_amount / float(self.base_asset_amount)
             
-        def build_trade(row):
+        def build_trade(row: pd.DataFrame) -> Trade:
                 
             try:
                 if row['user_txn_id'] == '':
@@ -86,7 +86,7 @@ class Sales():
         
         unprocessed_trades: Dict[str, List[Trade]] = {}
 
-        for index, row in self.trades.iterrows():
+        for index, row in trades.iterrows():
 
             trade = build_trade(row)
             
@@ -118,8 +118,8 @@ class Sales():
         
         return row
 
-    
-    def build_buy_list(self, trades, analysis_type: str, buy_types: List[str]):
+    @staticmethod
+    def build_buy_list(trades, analysis_type: str, buy_types: List[str]):
         """Generates list of BUY events and orders according to analysis type"""
 
         buy_txn_list = []
@@ -142,8 +142,8 @@ class Sales():
         
         return buy_txn_list
 
-    
-    def build_sell_list(self, trades, sell_types: List[str]):
+    @staticmethod
+    def build_sell_list(trades, sell_types: List[str]):
         """Generates list of SELL events and orders chronologically"""
 
         sell_txn_list = []
@@ -156,8 +156,8 @@ class Sales():
 
         return sell_txn_list
 
-
-    def process_trades(self, unprocessed_trades: pd.DataFrame, analysis_type: str, buy_types: List[str], sell_types: List[str]) -> pd.DataFrame:
+    @staticmethod
+    def process_trades(unprocessed_trades: pd.DataFrame, analysis_type: str, buy_types: List[str], sell_types: List[str]) -> pd.DataFrame:
         """Returns log of sale events given dictionary of unprocessed trades
         
         Args:
@@ -171,19 +171,18 @@ class Sales():
 
         """
 
-
         sale_log = pd.DataFrame()
 
-        for asset_name, txn_list in unprocessed_trades.items():
+        for _ , txn_list in unprocessed_trades.items():
 
             cap_gain_loss = 0
             overall_gain_loss = 0
 
             # Create Buy List
-            buy_txn_list = self.build_buy_list(txn_list, analysis_type, buy_types)
+            buy_txn_list = Sales.build_buy_list(txn_list, analysis_type, buy_types)
 
             # Create Sell List
-            sell_txn_list = self.build_sell_list(txn_list, sell_types)
+            sell_txn_list = Sales.build_sell_list(txn_list, sell_types)
             
             if not sell_txn_list: # Continue to next asset if no sales
                 continue
@@ -225,18 +224,17 @@ class Sales():
         return sale_log
 
     
-    def create_sale_summary(self) -> pd.DataFrame:
+    def create_annual_summary(self, sale_list) -> pd.DataFrame:
         """Returns annual summary of sale_list"""
-        
-        sale_log = self.sale_list
 
-        unique_assets = sale_log['BaseAsset'].unique()
-        year_list = sale_log['SellYear'].unique()
+        # Create empty annual_summmary dataFrame
+        unique_assets = sale_list['BaseAsset'].unique()
+        year_list = sale_list['SellYear'].unique()
         annual_summary = pd.DataFrame(columns = year_list, index=unique_assets)
         annual_summary.index.name = 'BaseAsset'
 
         for year in year_list:
-            df = sale_log[sale_log['SellYear'] == year]
+            df = sale_list[sale_list['SellYear'] == year]
             for asset in unique_assets:
                 small_df = df.loc[df['BaseAsset'] == asset]
                 sum = small_df['Gain/Loss'].sum()
@@ -250,7 +248,8 @@ class Sales():
     def download_sale_list(self):
         self.sale_list.to_csv('sale_log.csv')
         return
-    
+
+
     def download_annual_summary(self):
         self.annual_summary.to_csv('annual_summary.csv')
         return
