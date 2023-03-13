@@ -43,7 +43,7 @@ Config file has five Sections:
 ### [csv_info]
 #Information about where the csv of transactions is stored\
 **filename:** required. Should end in .csv\
-**dir:** optional. Leave value equal to empty if file is in current directory\
+**dir:** optional. Leave value equal to empty if file is in current directory
 
 ### [csv_columns]
 #Identifies which column names contain which values\
@@ -52,20 +52,20 @@ Config file has five Sections:
 **base_asset:** Name of asset name being traded / sold\
 **base_asset_amount:** \
 **quote_asset:** Quote asset name, typically USD or Fiat\
-**quote_asset_amount:** Amount asset is sold for\
+**quote_asset_amount:** Amount asset is sold for
  
  ## [opt_csv_columns]
  - **user_txn_id:** optional user provided id that can be populated into the Sale Log
 
 ### [buy_txn_types]
-#Enter which values correspond to buy transactions. Specifically, based on string search of column txn_type. For example, Airdrop can be added to be a buy transaction.\
+#Enter which values correspond to buy transactions. Specifically, values that are contained in column txn_type. For example, AIRDROP can be added to be a buy transaction.\
 **buy1:** BUY
 **buy2:** AIRDROP
 ...
 
 ### [sell_txn_types]
-#Enter which values correspond to buy transactions
-**sell:** SELL
+#Enter which values correspond to sell transactions
+**sell1:** SELL
 
 
 # Helpful Hints:
