@@ -59,7 +59,7 @@ Config file has five Sections:
 **quote_asset:** Quote asset name, typically USD or Fiat\
 **quote_asset_amount:** Amount asset is sold for
  
- ## [opt_csv_columns]
+### [opt_csv_columns]
  - **user_txn_id:** optional user provided id that can be populated into the Sale Log
 
 ### [buy_txn_types]
