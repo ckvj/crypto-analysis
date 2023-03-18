@@ -23,7 +23,7 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 - main.py imports and prints sale_list and annual_summary to the temrinal.
 
 
-##### Trade Information
+#### Trade Information
 - **timestamp:** Format 2021-09-27T01:46:03.000Z
 - **txn_type:** eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
 - **base_asset:** Asset being traded
@@ -31,7 +31,7 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 - **quote_asset:** Asset the traded asset is being quoted in
 - **quote_asset_amount:** Amount of Quote Asset
 
-##### Optional Columns:
+#### Optional Columns:
 - **user_txn_id:** Optional user-provided identifier that is populated into resulting sale log 
 
 # Configuration
