@@ -32,7 +32,7 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 Users should create a config.ini file and populate with below information. An example is in the repo at [config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini)
 
 # Configuration
-Must use a 'config.ini' file. An exmaple is in the repo.
+Default filename is 'config.ini' in the same directory, but optional config file path can be provided.
 
 Config file has five Sections:
 
@@ -43,7 +43,7 @@ Config file has five Sections:
 ### [csv_info]
 #Information about where the csv of transactions is stored\
 **filename:** required. Should end in .csv\
-**dir:** optional. Leave value equal to empty if file is in current directory
+**dir:** optional. Do not include if file is in current directory
 
 ### [csv_columns]
 #Identifies which column names contain which values\
