@@ -1,7 +1,7 @@
 # Purpose
 Processes financial transactions for use in annual capital gains tax reporting
 
-# Usage
+# Overview
 Current tax portfolio tools do not accurately render many transaction types. Therefore, many crypto users have resorted to populating important transactions into a spreadsheet.
 
 The crypto-tax package is a tool that enables individuals to easily calculate their tax basis across assets and calendar year.
@@ -17,6 +17,10 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 |--------|---------|------|-----------------|-----------|------------------|------|
 |2021-09-27T01:46:03.000Z|SELL|ETH|2|USD|4000|2000|
 |2021-09-27T01:46:03.000Z|BUY|NFT_NAME|1|USD|4000|4000|
+
+# Usage
+- crypto-tax is a package which can can be utilized to import and process trades.  
+- main.py imports and prints sale_list and annual_summary to the temrinal.
 
 ### Minimum Required Columns:
 - **timestamp:** Format 2021-09-27T01:46:03.000Z
