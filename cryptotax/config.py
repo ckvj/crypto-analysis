@@ -1,9 +1,10 @@
 import configparser
-from decimal import Decimal
 
-
-def process_config():
+def process_config(path):
     """Pulls info from config.ini which must be stored in same folder as main.py
+    
+    Args:
+        path: change file path
     
     Returns:
         config_dict: dictionary of config.ini
@@ -13,13 +14,15 @@ def process_config():
     """
 
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(path)
     
     config_dict = {s:dict(config.items(s)) for s in config.sections()}
     
-    # Set dir of CSV to None if not provided
+    # Set Path
     if config_dict['file_info'].get('dir', None) == None:
-        config_dict['file_info']['dir'] = None
+        config_dict['file_path'] = config_dict['file_info']['filename']
+    else:
+        config_dict['file_path'] = config_dict['file_info']['dir'] + config_dict['file_info']['filename']
         
     # Create List of buy types
     config_dict['buy_types_list'] = [x for x in list(config_dict['buy_txn_types'].values())]
@@ -32,18 +35,10 @@ def process_config():
     opt_cols = {y: x for x, y in config_dict['opt_csv_columns'].items() if y != ''}
     config_dict['col_rename'].update(opt_cols)
 
-    # Identify Columns to convert from string to other dtype
-    _column_dtypes = {config_dict['csv_columns']['quote_asset_amount'] : float}
-
-    if config_dict['opt_csv_columns']['user_txn_id'] != '':
-        _column_dtypes.update({config_dict['opt_csv_columns']['user_txn_id'] : str})
-
-    _converter = {config_dict['csv_columns']['base_asset_amount'] : Decimal}
-
     # Accounting Type Validations
     _supported_accounting_types = ['FIFO', 'LIFO', 'HIFO']
     if config_dict['accounting_type']['accounting_type'] not in _supported_accounting_types:
         raise ValueError('Unsupported Analysis Type')
     
-    return config_dict, _column_dtypes, _converter
+    return config_dict
 
