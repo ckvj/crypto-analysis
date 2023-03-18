@@ -22,7 +22,8 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 - crypto-tax is a package which can can be utilized to import and process trades.  
 - main.py imports and prints sale_list and annual_summary to the temrinal.
 
-### Minimum Required Columns:
+
+##### Trade Information
 - **timestamp:** Format 2021-09-27T01:46:03.000Z
 - **txn_type:** eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
 - **base_asset:** Asset being traded
@@ -30,13 +31,13 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 - **quote_asset:** Asset the traded asset is being quoted in
 - **quote_asset_amount:** Amount of Quote Asset
 
-### Optional Columns:
+##### Optional Columns:
 - **user_txn_id:** Optional user-provided identifier that is populated into resulting sale log 
 
-Users should create a config.ini file and populate with below information. An example is in the repo at [config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini)
-
 # Configuration
-Default filename is 'config.ini' in the same directory, but optional config file path can be provided.
+Users should create a config.ini file and populate with below information. An example is in the repo at [config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini).
+
+Default filename is 'config.ini' in the same directory, but optional file path can be provided when initializing Sales.
 
 Config file has five Sections:
 
