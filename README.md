@@ -4,15 +4,14 @@ Processes financial transactions for use in annual capital gains tax reporting
 # Overview
 Current tax portfolio tools do not accurately render many transaction types. Therefore, many crypto users have resorted to populating important transactions into a spreadsheet.
 
-The crypto-tax package is a tool that enables individuals to easily calculate their tax basis across assets and calendar year.
+The crypto-tax package is a tool that enables individuals to easily calculate their tax basis across assets.
 
-The package uses the 'Base Asset' and 'Quote Asset' model which is common in trading platforms.
+The package relies on transactions being populated in the 'Base Asset' and 'Quote Asset' model which is common in trading platforms.
 - Base Asset: Asset being traded
 - Quote Asset: Asset that Base Asset is being quoted in. Typically USD or other fiat.
 
-For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>crypto trades or crypto<>NFT), users should use a double entry system where trade routes through tax-demoninated Asset. 
+For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>crypto trades or crypto<>NFT), users should use a double entry system where trades route through a tax-demoninated Asset. For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $2k USD:
 
-For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $2k USD:
 |DateTime|Txn Type|Base Asset|Base Asset Amount|Quote Asset|Quote Asset Amount| Price|
 |--------|---------|------|-----------------|-----------|------------------|------|
 |2021-09-27T01:46:03.000Z|SELL|ETH|2|USD|4000|2000|
@@ -24,7 +23,7 @@ For example, a trade involving purchasing a NFT for 2 ETH, when ETH trading at $
 
 
 #### Trade Information
-- **timestamp:** Format 2021-09-27T01:46:03.000Z
+- **timestamp:** Preferred format 2021-09-27T01:46:03.000Z, though dates are imported using dateparser.parse which should accomodate other date syntax.
 - **txn_type:** eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
 - **base_asset:** Asset being traded
 - **base_asset_amount:** How much of asset is traded
