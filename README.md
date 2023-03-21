@@ -19,7 +19,7 @@ For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>c
 
 # Usage
 - crypto-tax is a package which can can be utilized to import and process trades.  
-- main.py imports and prints sale_list and annual_summary to the temrinal.
+- main.py imports and prints sale_list and annual_summary to the temrinal. 
 
 
 #### Trade Information
@@ -27,7 +27,7 @@ For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>c
 - **txn_type:** eg Buy, Airdrop, Redeem, Sell, etc. User can config which types of transactions are considered buy or sell for tax reasons.
 - **base_asset:** Asset being traded
 - **base_asset_amount:** How much of asset is traded
-- **quote_asset:** Asset the traded asset is being quoted in
+- **quote_asset:** Asset the traded asset is being quoted in (typically fiat, but asset tax base is being calculated in)
 - **quote_asset_amount:** Amount of Quote Asset
 
 #### Optional Columns:
@@ -36,7 +36,7 @@ For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>c
 # Configuration
 Users should create a config.ini file and populate with below information. An example is in the repo at [config.ini](https://github.com/ckvj/crypto-tax/blob/master/config.ini).
 
-Default filename is 'config.ini' in the same directory, but optional file path can be provided when initializing Sales.
+Default use is labeling file 'config.ini' and locating in the same directory, but optional file path can be provided when initializing Sales.
 
 Config file has five Sections:
 
