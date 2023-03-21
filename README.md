@@ -2,7 +2,7 @@
 Processes financial transactions for use in annual capital gains tax reporting
 
 # Overview
-Current tax portfolio tools do not accurately render many transaction types. Therefore, many crypto users have resorted to populating important transactions into a spreadsheet.
+Current tax portfolio tools do not accurately render many transaction types. Therefore, many crypto users have resorted to populating important transactions into a spreadsheet and working with external auditing companies to calculate their tax basis.
 
 The crypto-tax package is a tool that enables individuals to easily calculate their tax basis across assets.
 
