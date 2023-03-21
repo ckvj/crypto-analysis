@@ -18,8 +18,9 @@ For trades that do not use Quote Asset as the taxable Fiat asset (e.g. crypto<>c
 |2021-09-27T01:46:03.000Z|BUY|NFT_NAME|1|USD|4000|4000|
 
 # Usage
-- crypto-tax is a package which can can be utilized to import and process trades.  
-- main.py imports and prints sale_list and annual_summary to the temrinal. 
+- crypto-tax is a package which can can be utilized to import and process trades
+- main.py imports and prints sale_list and annual_summary to the temrinal
+- User can also download sale log and annual summary as csv
 
 
 #### Trade Information
