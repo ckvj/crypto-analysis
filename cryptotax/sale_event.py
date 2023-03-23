@@ -60,7 +60,3 @@ class SaleEventBuilder:
          
     def build_sale(self):
         return self.sale_event
-
-
-    
-
