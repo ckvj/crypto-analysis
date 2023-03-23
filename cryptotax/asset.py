@@ -4,8 +4,8 @@ from cryptotax.trade import Trade
 
 class Asset:
     
-    def __init__(self, name) -> None:
-        self.name: str = name
+    def __init__(self, asset_name) -> None:
+        self.asset_name: str = asset_name
         self.txn_list: List[Trade] = []
 
     @classmethod
