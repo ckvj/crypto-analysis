@@ -25,27 +25,38 @@ class Sales:
                 continue
             
             dust_threshold = 0.00001 # Used for rounding errors
+            
+            # Helper Function
+            def get_buy(): #TODO: What is asset and sale available locally in this function?
+                """Returns next logical buy event that occured before sale event"""
+                for buy in asset.buy_txn_list:
+                        if (buy.epoch_time <= sale.epoch_time) & (buy.remaining > 0):
+                            return buy
+                
+                # Should always be a buy that matches conditions. If not, raise error that more sold that bought.
+                raise Exception("More amount sold that bought. Fix amounts on CSV")
+
 
             for sale_ind, sale in enumerate(asset.sell_txn_list):
                 while sale.remaining > 0:
-                    for buy in asset.buy_txn_list:
-                        if (buy.epoch_time <= sale.epoch_time) & (buy.remaining > 0):
 
-                            sale_event = SaleEventBuilder(buy, sale). \
-                                calc_clip_size(). \
-                                calc_gain_loss(). \
-                                is_long_term(). \
-                                build_sale()
-                            
-                            row = sale_event.create_sale_row()
-                            sales_list = pd.concat([sales_list, row])
+                    buy = get_buy() # Get next buy event
+                    
+                    sale_event = SaleEventBuilder(buy, sale). \
+                        calc_clip_size(). \
+                        calc_gain_loss(). \
+                        is_long_term(). \
+                        build_sale()
+                    
+                    row = sale_event.create_sale_row()
+                    sales_list = pd.concat([sales_list, row])
 
-                            # Decrement
-                            buy.remaining -= sale_event.clip_size
-                            sale.remaining -= sale_event.clip_size
-                            
-                            if sale.remaining < dust_threshold:
-                                break
+                    # Decrement
+                    buy.remaining -= sale_event.clip_size
+                    sale.remaining -= sale_event.clip_size
+                    
+                    if sale.remaining < dust_threshold:
+                        break
                                 
                     # End Loop if Sales are complete
                     if (sale.remaining < dust_threshold) & (sale_ind == len(asset.sell_txn_list)-1):
