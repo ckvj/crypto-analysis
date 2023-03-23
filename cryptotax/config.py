@@ -1,44 +1,43 @@
 import configparser
+from typing import List, Dict, Optional
 
-def process_config(path):
-    """Pulls info from config.ini which must be stored in same folder as main.py
-    
-    Args:
-        path: change file path
-    
-    Returns:
-        config_dict: dictionary of config.ini
-        _column_dtypes: dictionary of {column names : dtype } to apply to data frame
-        _converter: dictionary of {column names : dtype } to apply via converter (eg needed for Decimal type)
-    
-    """
 
-    config = configparser.ConfigParser()
-    config.read(path)
+class Config:
+    def __init__(self, path) -> None:
+        self.read_config(path)
+        self.accounting_type: str
+        self.csv_filepath: str
+        self.buy_types: List[str]
+        self.sell_types: List[str]
+        self.col_rename: Dict[str,str]
+
+
+    def read_config(self, path: str):
+        config = configparser.ConfigParser()
+        config.read(path)
+        self.config = config
+        return self
     
-    config_dict = {s:dict(config.items(s)) for s in config.sections()}
-    
-    # Set Path
-    if config_dict['file_info'].get('dir', None) == None:
-        config_dict['file_path'] = config_dict['file_info']['filename']
-    else:
-        config_dict['file_path'] = config_dict['file_info']['dir'] + config_dict['file_info']['filename']
+    def set_accounting_type(self):
+        self.accounting_type = self.config['accounting_type']['accounting_type']
+        return self
+         
+    def set_csv_filepath(self):
+        if self.config['file_info'].get('dir', None) == None:
+            self.csv_filepath = self.config['file_info']['filename']
+        else:
+            self.csv_filepath = self.config['file_info']['dir'] + self.config['file_info']['filename']
         
-    # Create List of buy types
-    config_dict['buy_types_list'] = [x for x in list(config_dict['buy_txn_types'].values())]
-
-    # Create List of sell types
-    config_dict['sell_types_list'] = [x for x in list(config_dict['sell_txn_types'].values())]
+        return self
     
-    # Create dictionary to rename required & optional columns
-    config_dict['col_rename'] = {y: x for x, y in config_dict['csv_columns'].items()}
-    opt_cols = {y: x for x, y in config_dict['opt_csv_columns'].items() if y != ''}
-    config_dict['col_rename'].update(opt_cols)
-
-    # Accounting Type Validations
-    _supported_accounting_types = ['FIFO', 'LIFO', 'HIFO']
-    if config_dict['accounting_type']['accounting_type'] not in _supported_accounting_types:
-        raise ValueError('Unsupported Analysis Type')
+    def set_buy_types(self):
+        self.buy_types = [x for x in list(self.config['buy_txn_types'].values())]
+        return self
     
-    return config_dict
-
+    def set_sell_types(self):
+         self.sell_types = [x for x in list(self.config['sell_txn_types'].values())]
+         return self
+         
+    def create_col_rename_map(self):
+         self.col_rename = {y: x for x, y in self.config['csv_columns'].items()}
+         return self
