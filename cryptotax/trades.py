@@ -18,7 +18,6 @@ class Trades:
             set_sell_types().\
             create_col_rename_map()
         
-
         Asset.apply_config(config)
         self.import_trades(config)
         self.group_trades()
@@ -26,8 +25,8 @@ class Trades:
     def import_trades(self, config: Config):
         """Import trades based on config"""
 
-
         def rename_col(col: str, rename_map: Dict[str,str]) -> str:
+            """Small helped function to convert user-input column name to program-compatible name"""
             for key, value in rename_map.items():
                 if col == key:
                     col = value
