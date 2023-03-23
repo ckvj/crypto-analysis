@@ -1,99 +1,17 @@
-import datetime
-from dataclasses import dataclass
-from decimal import Decimal
-from typing import Dict, List, Optional
-from datetime import timezone
-
 import pandas as pd
-from dateutil import relativedelta
 
-from cryptotax.config import process_config
-from cryptotax.import_trades import import_trades
-from cryptotax.trade import Trade
+from cryptotax.sale_event import SaleEventBuilder
+from cryptotax.trades import Trades
+
 
 class Sales:
 
-    config_file_path = 'config.ini' # Set default config file path (same dir)
-
-    def __init__(self, path = config_file_path) -> None:
-        self._config_dict = process_config(path)
-        self.trades = import_trades(self._config_dict) 
-    
-
-    def create_sale_list(self):
+    def __init__(self, trades: Trades) -> None:
+        self.trades = trades.trades
+        self.grouped_trades = trades.grouped_trades
+        pass        
         
-        grouped_trades: Dict[str, List[Trade]] = {}
-        for trade in self.trades:
-            if grouped_trades.get(trade.base_asset) == None:
-                grouped_trades[trade.base_asset] = [trade]
-                continue
-            
-            grouped_trades[trade.base_asset].append(trade)
-            
-        self.sale_list = self.process_trades(grouped_trades)
-
-        return self
-
-    @staticmethod
-    def is_long_term_gain(buy_date: datetime, sell_date: datetime) -> bool:
-        time_delta = relativedelta.relativedelta(sell_date, buy_date)
-
-        if time_delta.years >= 1:
-            long_term = True
-        elif time_delta.years < 1:
-            long_term = False
-        
-        return long_term
-        
-        
-    @staticmethod
-    def build_sale_row(buy, sale, size: float, gain_loss: float, long_term: bool) -> pd.DataFrame:
-
-
-        row = pd.DataFrame([{'BaseAsset' : sale.base_asset, 'QuoteAsset' : sale.quote_asset, 'BuyDate' : buy.trade_time, 'BuyPrice' : buy.price, 'SellDate' : sale.trade_time,  'SellPrice' : sale.price, 'Amount' : size, 'Gain/Loss' : gain_loss, 'Long-Term' : long_term, 'SellYear' : sale.trade_time.year}])
-        
-        return row
-
-    @staticmethod
-    def build_buy_list(trades, analysis_type: str, buy_types: List[str]):
-        """Generates list of BUY events and orders according to analysis type"""
-
-        buy_txn_list = []
-
-        for trade in trades:
-            if any(buy_type in trade.txn_type for buy_type in buy_types):
-                buy_txn_list.append(trade)
-
-            
-        if buy_txn_list == []:
-            print('Error: No Buy events for ', trades[0].base_asset)
-            return buy_txn_list
-        
-        if analysis_type == 'FIFO':
-            buy_txn_list = sorted(buy_txn_list, key = lambda x : x.epoch_time)
-        elif analysis_type == 'LIFO':
-            buy_txn_list = sorted(buy_txn_list, key = lambda x : x.epoch_time, reverse=True)
-        elif analysis_type == 'HIFO':
-            buy_txn_list = sorted(buy_txn_list, key = lambda x : x.price, reverse=True)
-        
-        return buy_txn_list
-
-    @staticmethod
-    def build_sell_list(trades, sell_types: List[str]):
-        """Generates list of SELL events and orders chronologically"""
-
-        sell_txn_list = []
-
-        for trade in trades:
-            if any(sell_type in trade.txn_type for sell_type in sell_types):
-                sell_txn_list.append(trade)
-
-        sell_txn_list = sorted(sell_txn_list, key = lambda x : x.epoch_time)
-
-        return sell_txn_list
-
-    
-    def process_trades(self, unprocessed_trades: Dict[str,list[Optional[Trade]]]) -> pd.DataFrame:
+    def create_sale_list(self) -> pd.DataFrame:
         """Returns log of sale events given dictionary of unprocessed trades
         
         Args:
@@ -107,75 +25,60 @@ class Sales:
 
         """
 
-        sale_log = pd.DataFrame()
+        sales_list = pd.DataFrame()
 
-        # Unpack Configuration Variables
-        analysis_type = self._config_dict['accounting_type']['accounting_type']
-        buy_types = self._config_dict['buy_types_list']
-        sell_types = self._config_dict['sell_types_list']
+        for _ , asset in self.grouped_trades.items():
 
-        for _ , txn_list in unprocessed_trades.items():
-
-            cap_gain_loss = 0
-            overall_gain_loss = 0
-
-            # Create Buy List
-            buy_txn_list = Sales.build_buy_list(txn_list, analysis_type, buy_types)
-
-            # Create Sell List
-            sell_txn_list = Sales.build_sell_list(txn_list, sell_types)
+            asset.build_buy_list()
+            asset.build_sell_list()
             
-            if not sell_txn_list: # Continue to next asset if no sales
+            if not asset.sell_txn_list: # Continue to next asset if no sales
                 continue
             
             dust_threshold = 0.00001 # Used for rounding errors
 
-            for sale_ind, sale in enumerate(sell_txn_list):
+            for sale_ind, sale in enumerate(asset.sell_txn_list):
                 while sale.remaining > 0:
-                    for buy in buy_txn_list:
+                    for buy in asset.buy_txn_list:
                         if (buy.epoch_time <= sale.epoch_time) & (buy.remaining > 0):
 
-                            if buy.epoch_time == sale.epoch_time:
-                                raise Exception ('WARNING: Trade Buy Time == Sell Time')
-
-                            clip_size = min(buy.remaining, sale.remaining)
-                            cap_gain_loss = float(clip_size) * (sale.price - buy.price)
-
-                            is_long_term = Sales.is_long_term_gain(buy.trade_time, sale.trade_time)
-
+                            sale_event = SaleEventBuilder(buy, sale). \
+                                calc_clip_size(). \
+                                calc_gain_loss(). \
+                                is_long_term(). \
+                                build_sale()
                             
-                            # Log Sale
-                            row = Sales.build_sale_row(buy, sale, clip_size, cap_gain_loss, is_long_term)
-                            sale_log = pd.concat([sale_log, row])
+                            row = sale_event.create_sale_row()
+                            sales_list = pd.concat([sales_list, row])
 
-                            # Cleanup & Increment
-                            buy.remaining -= clip_size
-                            sale.remaining -= clip_size
-                            overall_gain_loss += cap_gain_loss
+                            # Decrement
+                            buy.remaining -= sale_event.clip_size
+                            sale.remaining -= sale_event.clip_size
                             
                             if sale.remaining < dust_threshold:
                                 break
                                 
                     # End Loop if Sales are complete
-                    if (sale.remaining < dust_threshold) & (sale_ind == len(sell_txn_list)-1):
+                    if (sale.remaining < dust_threshold) & (sale_ind == len(asset.sell_txn_list)-1):
                         break
         
-        sale_log.reset_index(inplace=True, drop = True)
-        sale_log.index.name = 'Txn'
-        return sale_log
+        sales_list.reset_index(inplace=True, drop = True)
+        sales_list.index.name = 'Txn'
+        self.sales_list = sales_list
+        return self
 
     
     def create_annual_summary(self) -> pd.DataFrame:
         """Returns annual summary of sale_list"""
 
-        # Create empty annual_summmary dataFrame
-        unique_assets = self.sale_list['BaseAsset'].unique()
-        year_list = self.sale_list['SellYear'].unique()
+        # Initialize empty dataFrame
+        unique_assets = self.sales_list['BaseAsset'].unique()
+        year_list = self.sales_list['SellYear'].unique()
         annual_summary = pd.DataFrame(columns = year_list, index=unique_assets)
         annual_summary.index.name = 'BaseAsset'
 
         for year in year_list:
-            df = self.sale_list[self.sale_list['SellYear'] == year]
+            df = self.sales_list[self.sales_list['SellYear'] == year]
             for asset in unique_assets:
                 small_df = df.loc[df['BaseAsset'] == asset]
                 sum = small_df['Gain/Loss'].sum()
@@ -191,7 +94,6 @@ class Sales:
     def download_sale_list(self):
         self.sale_list.to_csv('sale_log.csv')
         return
-
 
     def download_annual_summary(self):
         self.annual_summary.to_csv('annual_summary.csv')
