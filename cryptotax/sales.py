@@ -12,18 +12,7 @@ class Sales:
         pass        
         
     def create_sale_list(self) -> pd.DataFrame:
-        """Returns log of sale events given dictionary of unprocessed trades
-        
-        Args:
-            unprocessed_trades: dictionary of {'asset' : List[Trades]}
-            analysis_type: HIFO, LIFO, or FIFO
-            buy_types: List of strings that equal buy transaction types (eg BUY, AIRDROP)
-            sell_types: List of strings that equal buy transaction types (eg SELL, PURCHASE)
-        
-        Returns:
-            sale_log: List of Sale events, including gain-loss per sale 
-
-        """
+        """Returns log of sale events"""
 
         sales_list = pd.DataFrame()
 
