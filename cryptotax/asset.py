@@ -1,6 +1,6 @@
 from typing import List
 from cryptotax.trade import Trade
-
+from abc import ABC, abstractclassmethod
 
 class Asset:
     
@@ -10,11 +10,12 @@ class Asset:
 
     @classmethod
     def apply_config(cls, config):
-        cls.analysis_type = config.accounting_type
+        cls.analysis_strategy = config.analysis_strategy
         cls.buy_types = config.buy_types
         cls.sell_types = config.sell_types
+
     
-    def append_trade(self,trade: Trade):
+    def append_trade(self, trade: Trade):
         self.txn_list.append(trade)
         return self
     
@@ -29,16 +30,9 @@ class Asset:
 
         if buy_txn_list == []:
             self.buy_txn_list = buy_txn_list
-            return self
+            return
         
-        if self.analysis_type == 'FIFO':
-            buy_txn_list = sorted(buy_txn_list, key = lambda x : x.epoch_time)
-        elif self.analysis_type == 'LIFO':
-            buy_txn_list = sorted(buy_txn_list, key = lambda x : x.epoch_time, reverse=True)
-        elif self.analysis_type == 'HIFO':
-            buy_txn_list = sorted(buy_txn_list, key = lambda x : x.price, reverse=True)
-        
-        self.buy_txn_list = buy_txn_list
+        self.buy_txn_list = self.analysis_strategy.sort(buy_txn_list)
         return self
 
     def build_sell_list(self):
@@ -53,3 +47,24 @@ class Asset:
         self.sell_txn_list = sorted(sell_txn_list, key = lambda x : x.epoch_time)
 
         return self
+    
+
+# Strategy Pattern Implementation for Analysis Type
+class AnalysisStrategy(ABC):
+    @abstractclassmethod
+    def sort(self, txn_list: list[Trade]) -> list[Trade]:
+        pass
+
+class FifoStrategy(AnalysisStrategy):
+    def sort(self, txn_list: list[Trade]) -> list[Trade]:
+        return sorted(txn_list, key = lambda x : x.epoch_time)
+
+class LifoStrategy(AnalysisStrategy):
+    def sort(self, txn_list: list[Trade]) -> list[Trade]:
+        return sorted(txn_list, key = lambda x : x.epoch_time, reverse=True)
+    
+class HifoStrategy(AnalysisStrategy):
+    def sort(self, txn_list: list[Trade]) -> list[Trade]:
+        return sorted(txn_list, key = lambda x : x.price, reverse=True)
+    
+
