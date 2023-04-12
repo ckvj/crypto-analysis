@@ -10,10 +10,10 @@ def main():
     sales.create_annual_summary()
     
     # Print sale results
-    print(sales.sales_list.to_markdown())
+    print(sales.sale_events.to_markdown())
     print(sales.annual_summary.to_markdown())
 
-    # Downnload sale results
+    # # Downnload sale results
     # sales.download_sale_list
     # sales.download_annual_summary()
     

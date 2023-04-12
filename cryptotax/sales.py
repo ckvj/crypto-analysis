@@ -1,6 +1,6 @@
 import pandas as pd
 
-from cryptotax.sale_event import SaleEventBuilder
+from cryptotax.sale_event import SaleEvent
 from cryptotax.trades import Trades
 
 
@@ -8,15 +8,15 @@ class Sales:
 
     def __init__(self, trades: Trades) -> None:
         self.trades = trades.trades
-        self.grouped_trades = trades.grouped_trades
-        pass        
+        
+        self.sale_events: pd.DataFrame
+        self.annual_summary: pd.DataFrame      
         
     def create_sale_list(self) -> pd.DataFrame:
         """Returns log of sale events"""
+        sales_list = []
 
-        sales_list = pd.DataFrame()
-
-        for _ , asset in self.grouped_trades.items():
+        for _ , asset in self.trades.items():
 
             asset.build_buy_list()
             asset.build_sell_list()
@@ -24,32 +24,26 @@ class Sales:
             if not asset.sell_txn_list: # Continue to next asset if no sales
                 continue
             
-            dust_threshold = 0.00001 # Used for rounding errors
+            dust_threshold = 0.00001 # Used for small rounding errors
             
             # Helper Function
-            def get_buy(): #TODO: What is asset and sale available locally in this function?
-                """Returns next logical buy event that occured before sale event"""
+            def get_buy():
+                """Returns next logical buy event"""
                 for buy in asset.buy_txn_list:
                         if (buy.epoch_time <= sale.epoch_time) & (buy.remaining > 0):
                             return buy
                 
                 # Should always be a buy that matches conditions. If not, raise error that more sold that bought.
-                raise Exception("More amount sold that bought. Fix amounts on CSV")
-
+                raise Exception(f"More {sale.base_asset} sold that bought. Fix amounts on CSV")
 
             for sale_ind, sale in enumerate(asset.sell_txn_list):
                 while sale.remaining > 0:
 
                     buy = get_buy() # Get next buy event
                     
-                    sale_event = SaleEventBuilder(buy, sale). \
-                        calc_clip_size(). \
-                        calc_gain_loss(). \
-                        is_long_term(). \
-                        build_sale()
+                    sale_event = SaleEvent(buy, sale)
                     
-                    row = sale_event.create_sale_row()
-                    sales_list = pd.concat([sales_list, row])
+                    sales_list.append(sale_event.sale_row)
 
                     # Decrement
                     buy.remaining -= sale_event.clip_size
@@ -62,33 +56,35 @@ class Sales:
                     if (sale.remaining < dust_threshold) & (sale_ind == len(asset.sell_txn_list)-1):
                         break
         
-        sales_list.reset_index(inplace=True, drop = True)
-        sales_list.index.name = 'Txn'
-        self.sales_list = sales_list
-        return self
+        self.sale_events = pd.DataFrame(sales_list)
+        self.sale_events.index.name = 'Txn'
+        return
 
     
     def create_annual_summary(self) -> pd.DataFrame:
         """Returns annual summary of sale_list"""
 
-        # Initialize empty dataFrame
-        unique_assets = self.sales_list['BaseAsset'].unique()
-        year_list = self.sales_list['SellYear'].unique()
-        annual_summary = pd.DataFrame(columns = year_list, index=unique_assets)
-        annual_summary.index.name = 'BaseAsset'
+        # Initialize empty DataFrame
+        unique_assets = self.sale_events['BaseAsset'].unique() # Update
+        year_list = self.sale_events['SellYear'].unique()
+        self.annual_summary = pd.DataFrame(columns = year_list, index=unique_assets)
+        self.annual_summary.index.name = 'BaseAsset'
 
+        # Determine gain/loss per asset per year
+        gain_loss_totals = self.sale_events.groupby(['SellYear', 'BaseAsset'])['Gain/Loss'].sum()
+
+        # Populate annual_summary df
         for year in year_list:
-            df = self.sales_list[self.sales_list['SellYear'] == year]
-            for asset in unique_assets:
-                small_df = df.loc[df['BaseAsset'] == asset]
-                sum = small_df['Gain/Loss'].sum()
-                annual_summary.at[asset, year] = sum
+            _dict_ = dict.fromkeys(unique_assets, 0) # Initialize dictionary with 0 values
+            _ = dict(zip(gain_loss_totals[year].index, gain_loss_totals[year]))
+            _dict_.update(_) # Apply gain/loss per asset if applicable
             
-        annual_summary.loc['Total'] = annual_summary.sum()
+            self.annual_summary[year] = list(_dict_.values())
 
-        self.annual_summary = annual_summary   
-            
-        return self
+        # Calculate Annual Total Gain/Loss    
+        self.annual_summary.loc['Total'] = self.annual_summary.sum()
+
+        return 
 
 
     def download_sale_list(self):

@@ -4,19 +4,59 @@ from datetime import timezone
 from dateutil import parser
 
 class Trade:
-    def __init__(self) -> None:
-        self.trade_time: dt.datetime
-        self.txn_type: str
-        self.base_asset: str
-        self.base_asset_amount: Decimal
-        self.quote_asset: str
-        self.quote_asset_amount: float
+    def __init__(self, row) -> None:
 
-        # Assigned in TradeBuilder.build_trade method
-        self.epoch_time: dt.datetime
-        self.remaining: Decimal
-        self.price: float
+        self._trade_time = parser.parse((row['timestamp']))
+        self._txn_type = str(row['txn_type'])
+        self._base_asset = str(row['base_asset'])
+        self._base_asset_amount = Decimal(row['base_asset_amount'])
+        self._quote_asset = str(row['quote_asset'])
+        self._quote_asset_amount = Decimal(row['quote_asset_amount'])
+        self._epoch_time = self.trade_time.replace(tzinfo=timezone.utc).timestamp()
+        self._remaining = self.base_asset_amount
+        self._price = float(self.quote_asset_amount) / float(self.base_asset_amount)
+
+    # Enable Getters. Only attribute with a setter is 'remaining' because it is updated throughout processing
+    @property
+    def trade_time(self):
+        return self._trade_time
+
+    @property
+    def txn_type(self):
+        return self._txn_type
+
+    @property
+    def base_asset(self):
+        return self._base_asset
     
+    @property
+    def base_asset_amount(self):
+        return self._base_asset_amount
+    
+    @property
+    def quote_asset(self):
+        return self._quote_asset
+
+    @property
+    def quote_asset_amount(self):
+        return self._quote_asset_amount
+    
+    @property
+    def epoch_time(self):
+        return self._epoch_time
+    
+    @property
+    def remaining(self):
+        return self._remaining
+    
+    @remaining.setter
+    def remaining(self, value):
+        self._remaining = Decimal(value)
+    
+    @property
+    def price(self) -> float:
+        return self._price
+
     def __str__(self) -> str:
         return f"trade_time: {self.trade_time}\n\
             txn_type: {self.txn_type}\n\
@@ -27,47 +67,3 @@ class Trade:
             epoch_time: {self.epoch_time}\n\
             remaining: {self.remaining}\n\
             price: {self.price}"
-
-
-
-class TradeBuilder:
-    def __init__(self, trade = None):
-        if not trade:
-            self.trade = Trade()
-        else:
-            self.trade = trade
-    
-    def set_trade_time(self, timestamp):
-        self.trade.trade_time = parser.parse(timestamp)
-        return self
-
-    def set_txn_type(self, txn_type):
-        self.trade.txn_type = str(txn_type)
-        return self
-
-    def set_base_asset(self,base_asset):
-        self.trade.base_asset = str(base_asset)
-        return self
-    
-    def set_base_asset_amount(self,base_asset_amount):
-        self.trade.base_asset_amount = Decimal(base_asset_amount)
-        return self
-    
-    def set_quote_asset(self, quote_asset):
-        self.trade.quote_asset = str(quote_asset)
-        return self
-    
-    def set_quote_asset_amount(self, quote_asset_amount):
-        self.trade.quote_asset_amount = Decimal(quote_asset_amount)
-        return self
-    
-    def set_user_txn_id(self, user_txn_id):
-        self.trade.user_txn_id = str(user_txn_id)
-        return self
-
-    def build_trade(self):
-        self.trade.epoch_time = self.trade.trade_time.replace(tzinfo=timezone.utc).timestamp()
-        self.trade.remaining = self.trade.base_asset_amount
-        self.trade.price = float(self.trade.quote_asset_amount) / float(self.trade.base_asset_amount)
-        
-        return self.trade
