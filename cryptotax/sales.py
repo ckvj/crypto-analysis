@@ -68,7 +68,6 @@ class Sales:
         if events is None:
             events = self.sale_events
 
-
         # Initialize empty DataFrame
         unique_assets = events['BaseAsset'].unique() # Update
         year_list = events['SellYear'].unique()
