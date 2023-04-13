@@ -4,8 +4,8 @@ from cryptotax.trades import Trades
 def main():
     
     trades = Trades()
-    sales = Sales(trades)
     
+    sales = Sales(trades)
     sales.create_sale_list()
     sales.create_annual_summary()
     

@@ -13,7 +13,7 @@ class Sales:
         self.annual_summary: pd.DataFrame      
         
     def create_sale_list(self) -> pd.DataFrame:
-        """Returns log of sale events"""
+        """Returns dataframe of sale events"""
         sales_list = []
 
         for _ , asset in self.trades.items():
@@ -56,22 +56,27 @@ class Sales:
                     if (sale.remaining < dust_threshold) & (sale_ind == len(asset.sell_txn_list)-1):
                         break
         
+        # Convert to df
         self.sale_events = pd.DataFrame(sales_list)
         self.sale_events.index.name = 'Txn'
-        return
+        return self.sale_events
 
     
-    def create_annual_summary(self) -> pd.DataFrame:
-        """Returns annual summary of sale_list"""
+    def create_annual_summary(self, events = None) -> pd.DataFrame:
+        """Returns annual summary of sale events."""
+
+        if events is None:
+            events = self.sale_events
+
 
         # Initialize empty DataFrame
-        unique_assets = self.sale_events['BaseAsset'].unique() # Update
-        year_list = self.sale_events['SellYear'].unique()
+        unique_assets = events['BaseAsset'].unique() # Update
+        year_list = events['SellYear'].unique()
         self.annual_summary = pd.DataFrame(columns = year_list, index=unique_assets)
         self.annual_summary.index.name = 'BaseAsset'
 
         # Determine gain/loss per asset per year
-        gain_loss_totals = self.sale_events.groupby(['SellYear', 'BaseAsset'])['Gain/Loss'].sum()
+        gain_loss_totals = events.groupby(['SellYear', 'BaseAsset'])['Gain/Loss'].sum()
 
         # Populate annual_summary df
         for year in year_list:
@@ -84,7 +89,7 @@ class Sales:
         # Calculate Annual Total Gain/Loss    
         self.annual_summary.loc['Total'] = self.annual_summary.sum()
 
-        return 
+        return self.annual_summary
 
 
     def download_sale_list(self):
