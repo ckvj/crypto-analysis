@@ -49,13 +49,12 @@ class Sales:
                     buy.remaining -= sale_event.clip_size
                     sale.remaining -= sale_event.clip_size
                     
+                    if buy.remaining < dust_threshold:
+                        asset.buy_txn_list.remove(buy) # Shorten buy_txn_list to remove accounted for purchases
+
                     if sale.remaining < dust_threshold:
                         break
-                                
-                    # End Loop if Sales are complete
-                    if (sale.remaining < dust_threshold) & (sale_ind == len(asset.sell_txn_list)-1):
-                        break
-        
+
         # Convert to df
         self.sale_events = pd.DataFrame(sales_list)
         self.sale_events.index.name = 'Txn'
@@ -76,6 +75,7 @@ class Sales:
 
         # Determine gain/loss per asset per year
         gain_loss_totals = events.groupby(['SellYear', 'BaseAsset'])['Gain/Loss'].sum()
+        # pivot_table 
 
         # Populate annual_summary df
         for year in year_list:

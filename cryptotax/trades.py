@@ -19,7 +19,7 @@ class Trades:
     def __init__(self, path = config_file_path) -> None:
         self.config = Config(path)
         self.trades: Dict[str, Asset] = {}
-        self.import_trades(self.config)
+        self.import_trades()
         
     def import_trades(self):
 

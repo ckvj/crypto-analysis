@@ -7,26 +7,16 @@ class SaleEvent:
     def __init__(self, purchase, sale):        
         self.purchase = purchase
         self.sale = sale
-        self._clip_size: Decimal
-        self._gain_loss: float
-        self._long_term: bool
-        self.set_clip_size()
-  
-    @property
-    def clip_size(self):
-        return self._clip_size
-    
-    def set_clip_size(self) -> Decimal: # Couldn't use @clipsize.setter since no input param and therefore not triggered in init
-        self._clip_size = min(self.purchase.remaining, self.sale.remaining)
+        self.clip_size: Decimal = min(self.purchase.remaining, self.sale.remaining)
+        self.gain_loss: float = float(self.clip_size) * (self.sale.price - self.purchase.price)
+        self.long_term: bool
 
-    @property
-    def gain_loss(self):
-        return float(self.clip_size) * (self.sale.price - self.purchase.price)
     
     @property
     def long_term(self):
         time_delta = relativedelta.relativedelta(self.sale.trade_time, self.purchase.trade_time)
         return time_delta.years >= 1
+
 
     @property
     def sale_row(self) -> dict:
