@@ -1,6 +1,3 @@
-## Custom
-*.csv
-
 # VSCode
 .vscode/*
 !.vscode/settings.json
