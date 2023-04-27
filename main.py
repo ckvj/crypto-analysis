@@ -3,7 +3,7 @@ from cryptotax.trades import Trades
 
 def main():
     
-    trades = Trades() #param path enables custom path to config file
+    trades = Trades() #optional param path enables custom path to config file
     
     sales = Sales(trades)
     sales.create_sale_list()
@@ -13,7 +13,7 @@ def main():
     print(sales.sale_events.to_markdown())
     print(sales.annual_summary.to_markdown())
 
-    # # Downnload sale results
+    # # Download sale results
     # sales.download_sale_list
     # sales.download_annual_summary()
     
