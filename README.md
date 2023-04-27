@@ -76,3 +76,4 @@ Config file has five Sections:
 # Helpful Hints:
 - In the config.ini file, DO NOT use '' or "" around entries. Values are ingested as strings and converted when needed.
 - Columns txn_type entries should contain words that are in both [buy_txn_types] and [sell_txn_types], otherwise they will be double counted
+- Example transaction list can be found in tests/fixtures
