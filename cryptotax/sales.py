@@ -36,7 +36,7 @@ class Sales:
                 # Should always be a buy that matches conditions. If not, raise error that more sold that bought.
                 raise Exception(f"More {sale.base_asset} sold that bought. Fix amounts on CSV")
 
-            for sale_ind, sale in enumerate(asset.sell_txn_list):
+            for sale in asset.sell_txn_list:
                 while sale.remaining > 0:
 
                     buy = get_buy() # Get next buy event
@@ -67,23 +67,15 @@ class Sales:
         if events is None:
             events = self.sale_events
 
-        # Initialize empty DataFrame
-        unique_assets = events['BaseAsset'].unique() # Update
-        year_list = events['SellYear'].unique()
-        self.annual_summary = pd.DataFrame(columns = year_list, index=unique_assets)
-        self.annual_summary.index.name = 'BaseAsset'
+        # Calculate gain/loss per asset per year
+        self.annual_summary = pd.pivot_table(events, 
+                                             values = 'Gain/Loss',
+                                             columns = 'SellYear', 
+                                             index = 'BaseAsset', 
+                                             aggfunc = sum, 
+                                             fill_value=0,
+                                             )
 
-        # Determine gain/loss per asset per year
-        gain_loss_totals = events.groupby(['SellYear', 'BaseAsset'])['Gain/Loss'].sum()
-        # pivot_table 
-
-        # Populate annual_summary df
-        for year in year_list:
-            _dict_ = dict.fromkeys(unique_assets, 0) # Initialize dictionary with 0 values
-            _ = dict(zip(gain_loss_totals[year].index, gain_loss_totals[year]))
-            _dict_.update(_) # Apply gain/loss per asset if applicable
-            
-            self.annual_summary[year] = list(_dict_.values())
 
         # Calculate Annual Total Gain/Loss    
         self.annual_summary.loc['Total'] = self.annual_summary.sum()
