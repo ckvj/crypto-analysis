@@ -11,8 +11,7 @@ class SaleEvent:
         self._gain_loss: float
         self._long_term: bool
         self.set_clip_size()
-
-    
+  
     @property
     def clip_size(self):
         return self._clip_size
