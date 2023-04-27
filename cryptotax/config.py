@@ -1,10 +1,15 @@
 import configparser
 from typing import List, Dict, Optional
-from cryptotax.asset import FifoStrategy, LifoStrategy, HifoStrategy
+from cryptotax.analysis_strategies import FifoStrategy, LifoStrategy, HifoStrategy, AnalysisStrategy
 
 class Config:
     def __init__(self, path) -> None:
         self.config = self.read_config(path)
+        self.analysis_strategy: AnalysisStrategy
+        self.csv_filepath: str
+        self.buy_types: List[str]
+        self.sell_types: List[str]
+        self.col_rename_map: Dict[str,str]
 
     def read_config(self, path: str):
         config = configparser.ConfigParser()

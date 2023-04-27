@@ -3,7 +3,7 @@ from cryptotax.trades import Trades
 
 def main():
     
-    trades = Trades()
+    trades = Trades() #param path enables custom path to config file
     
     sales = Sales(trades)
     sales.create_sale_list()

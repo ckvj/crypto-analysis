@@ -1,18 +1,18 @@
 from typing import List
 from cryptotax.trade import Trade
-from abc import ABC, abstractclassmethod
+
 
 class Asset:
     
-    def __init__(self, asset_name) -> None:
+    def __init__(self, asset_name, config) -> None:
+        self.apply_config(config)
         self.asset_name: str = asset_name
         self.txn_list: List[Trade] = []
 
-    @classmethod
-    def apply_config(cls, config):
-        cls.analysis_strategy = config.analysis_strategy
-        cls.buy_types = config.buy_types
-        cls.sell_types = config.sell_types
+    def apply_config(self, config):
+        self.analysis_strategy = config.analysis_strategy
+        self.buy_types = config.buy_types
+        self.sell_types = config.sell_types
 
     
     def append_trade(self, trade: Trade):
@@ -47,24 +47,3 @@ class Asset:
         self.sell_txn_list = sorted(sell_txn_list, key = lambda x : x.epoch_time)
 
         return self
-    
-
-# Strategy Pattern Implementation for Analysis Type
-class AnalysisStrategy(ABC):
-    @abstractclassmethod
-    def sort(self, txn_list: list[Trade]) -> list[Trade]:
-        pass
-
-class FifoStrategy(AnalysisStrategy):
-    def sort(self, txn_list: list[Trade]) -> list[Trade]:
-        return sorted(txn_list, key = lambda x : x.epoch_time)
-
-class LifoStrategy(AnalysisStrategy):
-    def sort(self, txn_list: list[Trade]) -> list[Trade]:
-        return sorted(txn_list, key = lambda x : x.epoch_time, reverse=True)
-    
-class HifoStrategy(AnalysisStrategy):
-    def sort(self, txn_list: list[Trade]) -> list[Trade]:
-        return sorted(txn_list, key = lambda x : x.price, reverse=True)
-    
-
