@@ -1,6 +1,6 @@
 import configparser
 from typing import List, Dict
-from cryptotax import analysis_strategies
+import cryptotax.analysis_strategies as analysis_strategies
 from cryptotax.analysis_strategies import AnalysisStrategy
 
 class Config:
