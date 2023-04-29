@@ -1,5 +1,5 @@
-from src.cryptotax.sales import Sales
-from src.cryptotax.trades import Trades
+from cryptotax.sales import Sales
+from cryptotax.trades import Trades
 import sys
 
 def main():
