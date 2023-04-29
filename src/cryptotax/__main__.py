@@ -1,9 +1,13 @@
-from cryptotax.sales import Sales
-from cryptotax.trades import Trades
+from src.cryptotax.sales import Sales
+from src.cryptotax.trades import Trades
+import sys
 
 def main():
-    
-    trades = Trades() #optional param path enables custom path to config file
+        
+    if len(sys.argv) == 1:
+        trades = Trades()
+    else:
+        trades = Trades(path=sys.argv[1])
     
     sales = Sales(trades)
     sales.create_sale_list()
