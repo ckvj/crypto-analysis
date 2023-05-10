@@ -2,6 +2,7 @@ import pandas as pd
 
 from cryptotax.sale_event import SaleEvent
 from cryptotax.trades import Trades
+from cryptotax.const import DUST_THRESHOLD
 
 
 class Sales:
@@ -23,8 +24,6 @@ class Sales:
             
             if not asset.sell_txn_list: # Continue to next asset if no sales
                 continue
-            
-            dust_threshold = 0.00001 # Used for small rounding errors
             
             # Helper Function
             def get_buy():
@@ -49,10 +48,10 @@ class Sales:
                     buy.remaining -= sale_event.clip_size
                     sale.remaining -= sale_event.clip_size
                     
-                    if buy.remaining < dust_threshold:
+                    if buy.remaining < DUST_THRESHOLD:
                         asset.buy_txn_list.remove(buy) # Shorten buy_txn_list to remove accounted for purchases
 
-                    if sale.remaining < dust_threshold:
+                    if sale.remaining < DUST_THRESHOLD:
                         break
 
         # Convert to df

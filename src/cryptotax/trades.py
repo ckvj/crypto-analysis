@@ -10,14 +10,11 @@ class Trades:
     """ Imports trades based on config file
 
     Args:
-        path: optional. Filepath to config file    
-    
+        config_filepath: Filepath to INI config file
     """
     
-    config_file_path = 'config.ini' # Default config file path
-    
-    def __init__(self, path = config_file_path) -> None:
-        self.config = Config(path)
+    def __init__(self, config_filepath) -> None:
+        self.config = Config(config_filepath)
         self.trades: Dict[str, Asset] = {}
         self.import_trades()
         
