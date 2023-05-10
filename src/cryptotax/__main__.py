@@ -1,6 +1,6 @@
-from cryptotax.sales import Sales
-from cryptotax.trades import Trades
-from cryptotax.cli_input import process_config_location
+from .sales import Sales
+from .trades import Trades
+from .cli_input import process_config_location
 
 
 def main():

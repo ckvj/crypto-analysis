@@ -2,9 +2,9 @@ import csv
 
 from typing import Dict, List
 
-from cryptotax.config import Config
-from cryptotax.trade import Trade
-from cryptotax.asset import Asset
+from .config import Config
+from .trade import Trade
+from .asset import Asset
 
 class Trades:
     """ Imports trades based on config file

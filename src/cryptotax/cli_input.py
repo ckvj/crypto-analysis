@@ -1,6 +1,6 @@
 import os
 import argparse
-from cryptotax.const import DEFAULT_CONFIG_PATH
+from .const import DEFAULT_CONFIG_PATH
 
 
 def process_config_location():

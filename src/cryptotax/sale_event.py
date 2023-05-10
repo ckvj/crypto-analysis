@@ -1,6 +1,6 @@
 import pandas as pd
 from dateutil import relativedelta
-from cryptotax.trade import Trade
+from .trade import Trade
 from decimal import Decimal
 
 
