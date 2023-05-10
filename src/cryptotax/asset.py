@@ -1,6 +1,6 @@
 from typing import List
-from cryptotax.trade import Trade
-from cryptotax.analysis_strategies import AnalysisStrategy
+from .trade import Trade
+from .analysis_strategies import AnalysisStrategy
 
 
 class Asset:

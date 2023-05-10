@@ -1,8 +1,8 @@
 import pandas as pd
 
-from cryptotax.sale_event import SaleEvent
-from cryptotax.trades import Trades
-from cryptotax.const import DUST_THRESHOLD
+from .sale_event import SaleEvent
+from .trades import Trades
+from .const import DUST_THRESHOLD
 
 
 class Sales:

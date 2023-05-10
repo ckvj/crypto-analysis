@@ -1,7 +1,6 @@
 import configparser
 from typing import List, Dict
-import cryptotax.analysis_strategies as analysis_strategies
-from cryptotax.analysis_strategies import AnalysisStrategy
+from .analysis_strategies import AnalysisStrategy, get_analysis_strategy
 
 
 class Config:
@@ -30,8 +29,7 @@ class Config:
     def analysis_strategy(self):
         if not self._analysis_strategy:
             type = self.config['accounting_type']['accounting_type']
-            self._analysis_strategy = getattr(
-                analysis_strategies, f"{type.title()}Strategy")()
+            self._analysis_strategy = get_analysis_strategy(type)
         return self._analysis_strategy
 
     @property

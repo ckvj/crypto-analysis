@@ -1,6 +1,6 @@
 import pytest
-from cryptotax.trades import Trades
-from cryptotax.sales import Sales
+from src.cryptotax.trades import Trades
+from src.cryptotax.sales import Sales
 
 @pytest.fixture
 def FIFO_sales_test_data():
@@ -30,7 +30,7 @@ def test_integration_LIFO_create_sales_list(LIFO_sales_test_data):
 
 @pytest.fixture
 def HIFO_sales_test_data():
-    trades = Trades('/Users/carlvogel/Projects/crypto-tax/tests/fixtures/HIFO_test_config.ini')
+    trades = Trades('/Users/carlvogel/Projects/crypto-analysis/tests/fixtures/HIFO_test_config.ini')
     sales = Sales(trades)
     return sales
 
