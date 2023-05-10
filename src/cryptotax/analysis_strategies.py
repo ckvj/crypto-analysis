@@ -9,16 +9,16 @@ class AnalysisStrategy(ABC):
         pass
 
 class FifoStrategy(AnalysisStrategy):
-    ```First In First Out```
+    """First In First Out"""
     def sort(self, txn_list: List[Trade]) -> List[Trade]:
         return sorted(txn_list, key = lambda x : x.epoch_time)
 
 class LifoStrategy(AnalysisStrategy):
-    ```Last In First Out```
+    """Last In First Out"""
     def sort(self, txn_list: List[Trade]) -> List[Trade]:
         return sorted(txn_list, key = lambda x : x.epoch_time, reverse=True)
     
 class HifoStrategy(AnalysisStrategy):
-    ```Highest In First Out```
+    """Highest In First Out"""
     def sort(self, txn_list: List[Trade]) -> List[Trade]:
         return sorted(txn_list, key = lambda x : x.price, reverse=True)
