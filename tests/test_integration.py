@@ -2,41 +2,33 @@ import pytest
 from src.cryptotax.trades import Trades
 from src.cryptotax.sales import Sales
 
-@pytest.fixture
-def FIFO_sales_test_data():
-    trades = Trades('/Users/carlvogel/Projects/crypto-analysis/tests/fixtures/FIFO_test_config.ini')
-    sales = Sales(trades)
-    return sales
-
-def test_integration_FIFO_create_sales_list(FIFO_sales_test_data):
+class TestValues():
+    config_filepath = "/Users/carlvogel/Projects/crypto-analysis/tests/test_config.ini"
+    line_number_to_update = 1 #Line of Config File that is updated for Analysis Type
+    test_data = [
+        ('FIFO', -2577.723414),
+        ('LIFO', -5249.973603),
+        ('HIFO', -5754.592296),
+        ]
     
-    df = FIFO_sales_test_data.create_sale_list()
+# Helper Function
+def replace_line(file_name, line_num, text):
+    """Replaces text of 1 line in file"""
+    lines = open(file_name, 'r').readlines()
+    lines[line_num] = text
+    out = open(file_name, 'w')
+    out.writelines(lines)
+    out.close()
 
-    assert len(df) == 11
-    assert round(df['Gain/Loss'].sum(),2) == round(-2577.723414,2)
 
-@pytest.fixture
-def LIFO_sales_test_data():
-    trades = Trades('/Users/carlvogel/Projects/crypto-analysis/tests/fixtures/LIFO_test_config.ini')
-    sales = Sales(trades)
-    return sales
+@pytest.mark.parametrize("analysis_type, expected", TestValues.test_data)
+def test_create_sales_list(analysis_type, expected):
 
-def test_integration_LIFO_create_sales_list(LIFO_sales_test_data):
+    analysis_type_line = f'accounting_type = {analysis_type}\n'
+
+    replace_line(TestValues.config_filepath, TestValues.line_number_to_update, analysis_type_line)
     
-    df = LIFO_sales_test_data.create_sale_list()
-    print(df.to_markdown())
-    assert len(df) == 10
-    assert round(df['Gain/Loss'].sum(),2) == round(-5249.973603,2)
+    trades = Trades(TestValues.config_filepath)
+    sale_list = Sales(trades).create_sale_list()
 
-@pytest.fixture
-def HIFO_sales_test_data():
-    trades = Trades('/Users/carlvogel/Projects/crypto-analysis/tests/fixtures/HIFO_test_config.ini')
-    sales = Sales(trades)
-    return sales
-
-def test_integration_HIFO_create_sales_list(HIFO_sales_test_data):
-    
-    df = HIFO_sales_test_data.create_sale_list()
-    print(df.to_markdown())
-    assert len(df) == 11
-    assert round(df['Gain/Loss'].sum(),2) == round(-5754.592296,2)
+    assert round(sale_list['Gain/Loss'].sum(),2) == round(expected,2)
