@@ -1,11 +1,12 @@
+
 from .sales import Sales
 from .trades import Trades
-from .cli_input import process_config_location
+from .cli_input import collect_config_filepath
 
 
 def main():
 
-    config_path = process_config_location()
+    config_path = collect_config_filepath()
 
     trades = Trades(config_path)
 
