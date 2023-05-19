@@ -1,9 +1,8 @@
-import os
 import argparse
 from .const import DEFAULT_CONFIG_PATH
 
 
-def process_config_location():
+def collect_config_filepath():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('config_path', default=DEFAULT_CONFIG_PATH, nargs='?',

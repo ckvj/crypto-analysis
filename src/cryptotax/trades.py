@@ -1,6 +1,6 @@
 import csv
 
-from typing import Dict, List
+from typing import Dict
 
 from .config import Config
 from .trade import Trade
